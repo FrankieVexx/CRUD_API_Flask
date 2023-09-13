@@ -7,6 +7,10 @@ app = Flask(__name__)
 with open('company.json', 'r') as f:
     data = json.load(f)
 
+@app.route('/')
+def homepage():
+    return "This is the API homepage"
+
 # Create a new company
 @app.route('/create', methods=['POST'])
 def create_company():
