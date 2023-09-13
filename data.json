@@ -63,13 +63,6 @@
         "CEO": "Pat Gelsinger"
     },
     {
-        "id": 10,
-        "name": "Johnson & Johnson",
-        "location": "New Brunswick, New Jersey, USA",
-        "year_founded": 1886,
-        "CEO": "Alex Gorsky"
-    },
-    {
         "name": "Frankie"
     }
 ]
