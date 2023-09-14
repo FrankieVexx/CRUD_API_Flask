@@ -32,10 +32,28 @@ class Person(db.Model):
 We define a Person class that inherits from db.Model, which is a SQLAlchemy base class for creating database models.
 The Person class represents the structure of a person, with attributes like id, name, and age. The id field serves as the primary key.
 
+### Read all records in the database
+
+```python
+def read_all_records():
+    persons = Person.query.all()  # Retrieve all records from the Person table
+    person_list = []
+
+    for person in persons:
+        person_data = {
+            "id": person.id,
+            "name": person.name,
+            "age": person.age
+        }
+        person_list.append(person_data)
+    return jsonify(person_list)
+```
+This route allows the reading of all the records in the database
+
 ### Creating a New Person (CREATE)
 
 ```python
-@app.route('/api', methods=['POST'])
+@app.route('/api/create', methods=['POST'])
 def create_person():
     data = request.get_json()
     new_person = Person(name=data['name'], age=data['age'])

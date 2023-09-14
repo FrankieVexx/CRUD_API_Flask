@@ -6,11 +6,25 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///persons.db'  # SQLite databas
 db = SQLAlchemy(app)
 
 class Person(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(80), nullable=False)
     age = db.Column(db.Integer, nullable=False)
 
-@app.route('/api', methods=['POST'])
+@app.route('/api', methods=['GET'])
+def read_all_records():
+    persons = Person.query.all()  # Retrieve all records from the Person table
+    person_list = []
+
+    for person in persons:
+        person_data = {
+            "id": person.id,
+            "name": person.name,
+            "age": person.age
+        }
+        person_list.append(person_data)
+    return jsonify(person_list)
+
+@app.route('/api/create', methods=['POST'])
 def create_person():
     data = request.get_json()
     new_person = Person(name=data['name'], age=data['age'])
