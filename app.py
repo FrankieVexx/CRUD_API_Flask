@@ -1,60 +1,44 @@
 from flask import Flask, request, jsonify
-import json
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///persons.db'  # SQLite database
+db = SQLAlchemy(app)
 
-# Load the JSON data
-with open('company.json', 'r') as f:
-    data = json.load(f)
+class Person(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
 
-@app.route('/')
-def homepage():
-    return "This is the API homepage"
+@app.route('/api', methods=['POST'])
+def create_person():
+    data = request.get_json()
+    new_person = Person(name=data['name'], age=data['age'])
+    db.session.add(new_person)
+    db.session.commit()
+    return jsonify({"message": "Person created successfully"}), 201
 
-# Create a new company
-@app.route('/api/create', methods=['POST'])
-def create_company():
-    new_company = request.json
-    data.append(new_company)
-    with open('company.json', 'w') as f:
-        json.dump(data, f, indent=4)
-    return jsonify({"message": "Company created successfully"}), 201
+@app.route('/api/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
+def manage_person(user_id):
+    person = Person.query.get_or_404(user_id)
 
-# Read all records
-@app.route('/api', methods=['GET'])
-def read_records():
-    return jsonify(data)
+    if request.method == 'GET':
+        return jsonify({"name": person.name, "age": person.age})
 
-# Read a specific record by ID
-@app.route('/api/read/<int:record_id>', methods=['GET'])
-def view_company(record_id):
-    company = next((item for item in data if item["id"] == record_id), None)
-    if company is not None:
-        return jsonify(company)
-    return jsonify({"message": "company not found"}), 404
+    if request.method == 'PUT':
+        data = request.get_json()
+        person.name = data['name']
+        person.age = data['age']
+        db.session.commit()
+        return jsonify({"message": "Person updated successfully"})
 
-# Update a company by ID
-@app.route('/api/update/<int:record_id>', methods=['PUT'])
-def update_company(record_id):
-    updated_company = request.json
-    for i, record in enumerate(data):
-        if record["id"] == record_id:
-            data[i] = updated_company
-            with open('data.json', 'w') as f:
-                json.dump(data, f, indent=4)
-            return jsonify({"message": "Company updated successfully"})
-    return jsonify({"message": "Conlmpany not found"}), 404
-
-# Delete a company by ID
-@app.route('/api/delete/<int:record_id>', methods=['DELETE'])
-def delete_company(record_id):
-    for i, record in enumerate(data):
-        if record["id"] == record_id:
-            del data[i]
-            with open('data.json', 'w') as f:
-                json.dump(data, f, indent=4)
-            return jsonify({"message": "Company deleted successfully"})
-    return jsonify({"message": "Company not found"}), 404
+    if request.method == 'DELETE':
+        db.session.delete(person)
+        db.session.commit()
+        return jsonify({"message": "Person deleted successfully"})
 
 if __name__ == '__main__':
-    app.run(port =5000, debug=True)
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True, port=8000)
+
