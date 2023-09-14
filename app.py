@@ -9,6 +9,9 @@ class Person(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(80), nullable=False)
     age = db.Column(db.Integer, nullable=False)
+@app.route('/', methods=['GET'])
+def landing_page():
+    return "This is a sample landing page"
 
 @app.route('/api', methods=['GET'])
 def read_all_records():
